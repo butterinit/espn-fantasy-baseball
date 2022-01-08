@@ -53,7 +53,7 @@ class Team:
         self.season_pitching.index.name = 'team_id'
 
     def get_daily_stats(self, roster_json):
-        # need to sort stats by pitching or hitting
+        # need to sort stats by pitching or hitting for ease of viewing
         df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id"]
         df = pd.DataFrame(columns=df_columns)
         for player in roster_json:

@@ -1,11 +1,11 @@
 import requests
-import pandas as pd
 
 
 class ESPNRequester:
     def __init__(self, league_id: int, season_id: int, swid: str = None, espn_s2: str = None):
         self.league_id = league_id
         self.season_id = season_id
+        # The base url for api requests of the specified fantasy league.  Only valid for season_id > 2018
         self.url = f"https://fantasy.espn.com/apis/v3/games/flb/seasons/{season_id}/segments/0/leagues/{league_id}"
         self.cookies = dict(swid=swid, espn_s2=espn_s2)
 
@@ -27,24 +27,3 @@ class ESPNRequester:
         params = {"scoringPeriodId": f"{scoring_period_id}", "view": "mRoster"}
         r = requests.get(self.url, params=params, cookies=self.cookies)
         return r.json()["teams"]
-
-    def get_team_daily_stats(self, team_id, scoring_period_id):
-        params = {"forTeamId": f"{team_id}", "scoringPeriodId": f"{scoring_period_id}", "view": "mRoster"}
-        cookies = self.cookies
-        r = requests.get(self.url, params=params, cookies=cookies)
-        json = r.json()
-        df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id"]
-        df = pd.DataFrame(columns=df_columns)
-        players = json["teams"][0]["roster"]["entries"]
-        for player in players:
-            d = {"team_id": team_id, "player_id": player["playerId"], "scoring_period_id": scoring_period_id,
-                 "lineup_id": player["lineupSlotId"]}
-            for stat_set in player["playerPoolEntry"]["player"]["stats"]:
-                if stat_set["statSourceId"] == 0 and stat_set["statSplitTypeId"] == 5:
-                    d.update(stat_set["stats"])
-            df = df.append(d, ignore_index=True)
-        return df
-
-    @staticmethod
-    def commit_to_db(df, table, db):
-        df.to_sql(table, db)
