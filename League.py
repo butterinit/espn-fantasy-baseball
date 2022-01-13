@@ -12,10 +12,10 @@ class League:
         self.season_hitting = pd.DataFrame()
         self.season_pitching = pd.DataFrame()
         self.last_scoring_period = None
-        self.get_teams()
-        self.get_season_statistics()
+        self.update_teams()
+        self.update_season_statistics()
 
-    def get_teams(self):
+    def update_teams(self):
         data = self.req.get_teams()
         team_quantity = len(data)
         for team_id in range(1, team_quantity+1):
@@ -23,12 +23,12 @@ class League:
             new_team = Team(self.league_id, self.season_id, team_id, team_json=team_data)
             self.teams.append(new_team)
 
-    def get_season_statistics(self):
+    def update_season_statistics(self):
         for team in self.teams:
             self.season_hitting = self.season_hitting.append(team.season_hitting)
             self.season_pitching = self.season_pitching.append(team.season_pitching)
 
-    def get_daily_statistics(self, scoring_period_id):
+    def update_daily_statistics(self, scoring_period_id):
         league_roster_json = self.req.get_daily_stats(scoring_period_id=scoring_period_id)
         df = pd.DataFrame()
         for team in self.teams:

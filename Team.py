@@ -1,5 +1,5 @@
 import pandas as pd
-from espn_constant import STATS_MAP
+from espn_constant import HITTING_MAP, PITCHING_MAP, POSITION_MAP
 
 
 class Team:
@@ -20,13 +20,13 @@ class Team:
         self.division_id = None
         self.team_json = team_json
         if self.team_json is not None:
-            self.get_info(self.team_json)
-            self.get_season_stats(self.team_json)
+            self.update_team_info(self.team_json)
+            self.update_season_stats(self.team_json)
 
-    def __str__(self):
+    def __repr__(self):
         return f"team: {self.team_id}"
 
-    def get_info(self, team_json):
+    def update_team_info(self, team_json):
         data = team_json
         self.abbrev = data["abbrev"]
         self.division_id = data["divisionId"]
@@ -37,34 +37,62 @@ class Team:
         self.record = data["record"]["overall"]
         self.transaction_counter = data["transactionCounter"]
 
-    def get_season_stats(self, team_json):
+    def update_season_stats(self, team_json):
         data = team_json["valuesByStat"]
         hitting_dict = {}
         pitching_dict = {}
         for stat in data:
             stat = int(stat)
             if stat <= 31:
-                hitting_dict[STATS_MAP[stat]] = data[str(stat)]
+                hitting_dict[HITTING_MAP[stat]] = data[str(stat)]
             elif 33 <= stat <= 66:
-                pitching_dict[STATS_MAP[stat]] = data[str(stat)]
+                pitching_dict[PITCHING_MAP[stat]] = data[str(stat)]
         self.season_hitting = pd.DataFrame(hitting_dict, index={self.team_id})
         self.season_hitting.index.name = 'team_id'
         self.season_pitching = pd.DataFrame(pitching_dict, index={self.team_id})
         self.season_pitching.index.name = 'team_id'
 
-    def get_daily_stats(self, roster_json):
-        # need to sort stats by pitching or hitting for ease of viewing
-        df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id"]
+    def get_daily_stats(self, roster_json: dict):
+        """
+        Parses the JSON info returned from the ESPN API and stores the statistics of the team in a DataFrame.
+        Need to sort stats for ease of viewing.
+        :param roster_json: The team roster JSON returned from the ESPN API for the specified scoring period.
+        :return: Pandas DataFrame
+        """
+        df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id", "position"]
         df = pd.DataFrame(columns=df_columns)
         for player in roster_json:
-            d = {"team_id": self.team_id, "player_id": player["playerId"], "scoring"
-                 "lineup_id": player["lineupSlotId"]}
+            player_dict = {"team_id": self.team_id, "player_id": player["playerId"],
+                           "lineup_id": player["lineupSlotId"], "position": POSITION_MAP[player["lineupSlotId"]]}
             for stat_set in player["playerPoolEntry"]["player"]["stats"]:
                 if stat_set["statSourceId"] == 0 and stat_set["statSplitTypeId"] == 5:
-                    d["scoring_period_id"] = stat_set["scoringPeriodId"]
-                    d.update(stat_set["stats"])
-            df = df.append(d, ignore_index=True)
+                    player_dict["scoring_period_id"] = stat_set["scoringPeriodId"]
+                    # checks if the player is in an active hitting spot and adds hitting stats to the player dict
+                    if int(player_dict["lineup_id"]) <= 12 or int(player_dict["lineup_id"]) == 19:
+                        player_dict.update(self.process_hitting_stats(stat_set["stats"]))
+                    # checks if the player is in an active pitching spot and adds pitching stats to the player dict
+                    elif 13 <= int(player_dict["lineup_id"]) <= 15:
+                        player_dict.update(self.process_pitching_stats(stat_set["stats"]))
+            df = df.append(player_dict, ignore_index=True)
         return df
+
+    @staticmethod
+    def process_hitting_stats(stat_dict):
+        hitting_dict = dict()
+        for stat in stat_dict:
+            stat = int(stat)
+            if stat <= 31:
+                hitting_dict[HITTING_MAP[stat]] = stat_dict[str(stat)]
+        return hitting_dict
+
+    @staticmethod
+    def process_pitching_stats(stat_dict):
+        pitching_dict = dict()
+        for stat in stat_dict:
+            stat = int(stat)
+            if 33 <= stat <= 66:
+                pitching_dict[PITCHING_MAP[stat]] = stat_dict[str(stat)]
+        return pitching_dict
 
     def get_current_roster(self):
         pass

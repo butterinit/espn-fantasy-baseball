@@ -27,3 +27,12 @@ class ESPNRequester:
         params = {"scoringPeriodId": f"{scoring_period_id}", "view": "mRoster"}
         r = requests.get(self.url, params=params, cookies=self.cookies)
         return r.json()["teams"]
+
+    def get_league_settings(self):
+        """
+
+        :return:
+        """
+        params = {"view": "mSettings"}
+        r = requests.get(self.url, params=params, cookies=self.cookies)
+        return r.json()["settings"]
