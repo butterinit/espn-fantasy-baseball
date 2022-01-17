@@ -3,7 +3,7 @@ from espn_constant import HITTING_MAP, PITCHING_MAP, POSITION_MAP
 
 
 class Team:
-    def __init__(self, league_id, season_id, team_id, team_json=None):
+    def __init__(self, league_id: int, season_id: int, team_id: int, team_json: dict = None):
         self.league_id = league_id
         self.season_id = season_id
         self.team_id = team_id
@@ -19,6 +19,9 @@ class Team:
         self.transaction_counter = None
         self.division_id = None
         self.team_json = team_json
+        self.hitting_columns = list()
+        self.pitching_columns = list()
+        self.create_frames()
         if self.team_json is not None:
             self.update_team_info(self.team_json)
             self.update_season_stats(self.team_json)
@@ -26,7 +29,23 @@ class Team:
     def __repr__(self):
         return f"team: {self.team_id}"
 
-    def update_team_info(self, team_json):
+    def create_frames(self):
+        """
+        Creates a list of the pitching and hitting columns to be used in the statistical DataFrames.
+        The column lists are stored in the Team attributes.
+        :return: None
+        """
+        for stat in HITTING_MAP:
+            self.hitting_columns.append(stat)
+        for stat in PITCHING_MAP:
+            self.pitching_columns.append(stat)
+
+    def update_team_info(self, team_json: dict):
+        """
+        Updates the information for each team in the league.
+        :param team_json: JSON data for the team
+        :return: None
+        """
         data = team_json
         self.abbrev = data["abbrev"]
         self.division_id = data["divisionId"]
@@ -38,6 +57,11 @@ class Team:
         self.transaction_counter = data["transactionCounter"]
 
     def update_season_stats(self, team_json):
+        """
+        Parses the JSON data for the team and stores the total hitting and pitching stats for the team in attributes.
+        :param team_json: JSON data for the team
+        :return: None
+        """
         data = team_json["valuesByStat"]
         hitting_dict = {}
         pitching_dict = {}
@@ -78,6 +102,15 @@ class Team:
 
     @staticmethod
     def process_hitting_stats(stat_dict):
+        """
+        Takes a stat dictionary found in the roster JSON data and returns a dictionary with the hitting statistic names as
+        keys and their respective values as values.
+        :param stat_dict: statistic dictionary taken from roster JSON data
+        :return: human readable hitting dictionary
+        """
+        hitting_columns = []
+        for stat in HITTING_MAP:
+            hitting_columns.append(HITTING_MAP[stat])
         hitting_dict = dict()
         for stat in stat_dict:
             stat = int(stat)
