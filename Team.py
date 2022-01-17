@@ -103,10 +103,10 @@ class Team:
     @staticmethod
     def process_hitting_stats(stat_dict):
         """
-        Takes a stat dictionary found in the roster JSON data and returns a dictionary with the hitting statistic names as
-        keys and their respective values as values.
+        Takes a stat dictionary found in the roster JSON data and returns a dictionary with the hitting statistic names
+        as keys and their respective values as values.
         :param stat_dict: statistic dictionary taken from roster JSON data
-        :return: human readable hitting dictionary
+        :return: human-readable hitting dictionary
         """
         hitting_columns = []
         for stat in HITTING_MAP:
@@ -120,6 +120,12 @@ class Team:
 
     @staticmethod
     def process_pitching_stats(stat_dict):
+        """
+        Takes a stat dictionary found in the roster JSON data and returns a dictionary with the pitching statistic names
+        as keys and their respective values as values.
+        :param stat_dict: statistic dictionary taken from roster JSON data
+        :return: human-readable pitching dictionary
+        """
         pitching_dict = dict()
         for stat in stat_dict:
             stat = int(stat)

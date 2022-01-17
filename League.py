@@ -51,9 +51,5 @@ class League:
         return df
 
     def get_league_info(self, commit: bool = False):
-        # things to grab: final scoring period, team information, settings
-        pass
-
-    def populate_stats(self):
-        # this should get the daily stats for the entire season for each team
+        # things to grab: final scoring period, roster settings, scoring settings
         pass
