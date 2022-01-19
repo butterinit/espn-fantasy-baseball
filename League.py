@@ -11,7 +11,8 @@ class League:
         self.teams = []
         self.season_hitting = pd.DataFrame()
         self.season_pitching = pd.DataFrame()
-        self.last_scoring_period = None
+        self.final_scoring_period = None
+        self.get_league_info()
         self.update_teams()
         self.update_season_statistics()
 
@@ -43,13 +44,38 @@ class League:
         :return: A DataFrame containing the league statistics for the scoring period.
         """
         league_roster_json = self.req.get_daily_stats(scoring_period_id=scoring_period_id)
-        df = pd.DataFrame()
+        hitting_df = pd.DataFrame()
+        pitching_df = pd.DataFrame()
         for team in self.teams:
             team_roster_json = league_roster_json[team.team_id-1]["roster"]["entries"]
-            new_row = team.get_daily_stats(team_roster_json)
-            df = df.append(new_row)
-        return df
+            hitting, pitching = team.get_daily_stats(team_roster_json)
+            hitting_df = hitting_df.append(hitting)
+            pitching_df = pitching_df.append(pitching)
+        return hitting_df, pitching_df
 
-    def get_league_info(self, commit: bool = False):
-        # things to grab: final scoring period, roster settings, scoring settings
-        pass
+    def get_all_daily_stats(self, hitting_file: str = "total daily hitting.xlsx", pitching_file:
+                            str = "total daily pitching.xlsx"):
+        """
+        gets daily stats for the entire season and outputs the data as two seperate excel files.
+        todo: combine the files into one workbook
+        :param hitting_file:
+        :param pitching_file:
+        :return: None
+        """
+        hitting_df = pd.DataFrame()
+        pitching_df = pd.DataFrame()
+        for i in range(1, self.final_scoring_period+1):
+            hitting, pitching = self.update_daily_statistics(i)
+            hitting_df = hitting_df.append(hitting)
+            pitching_df = pitching_df.append(pitching)
+        hitting_df.to_excel(hitting_file)
+        pitching_df.to_excel(pitching_file)
+
+    def get_league_info(self):
+        """
+        gathers league settings and stores them in attributes
+        todo: add roster settings and scoring settings
+        :return: None
+        """
+        settings_json = self.req.get_league_settings()
+        self.final_scoring_period = int(settings_json["status"]["finalScoringPeriod"])

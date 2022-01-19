@@ -36,9 +36,9 @@ class Team:
         :return: None
         """
         for stat in HITTING_MAP:
-            self.hitting_columns.append(stat)
+            self.hitting_columns.append(HITTING_MAP[stat])
         for stat in PITCHING_MAP:
-            self.pitching_columns.append(stat)
+            self.pitching_columns.append(PITCHING_MAP[stat])
 
     def update_team_info(self, team_json: dict):
         """
@@ -76,7 +76,7 @@ class Team:
         self.season_pitching = pd.DataFrame(pitching_dict, index={self.team_id})
         self.season_pitching.index.name = 'team_id'
 
-    def get_daily_stats(self, roster_json: dict):
+    def get_daily_stats_old(self, roster_json: dict):
         """
         Parses the JSON info returned from the ESPN API and stores the statistics of the team in a DataFrame.
         Need to sort stats for ease of viewing.
@@ -99,6 +99,33 @@ class Team:
                         player_dict.update(self.process_pitching_stats(stat_set["stats"]))
             df = df.append(player_dict, ignore_index=True)
         return df
+
+    def get_daily_stats(self, roster_json: dict):
+        """
+        Parses the JSON info returned from the ESPN API and stores the statistics of the team in a DataFrame.
+        Need to sort stats for ease of viewing.
+        :param roster_json: The team roster JSON returned from the ESPN API for the specified scoring period.
+        :return: Pandas DataFrame
+        """
+        df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id", "position"]
+        hitting_df = pd.DataFrame(columns=(df_columns+self.hitting_columns))
+        pitching_df = pd.DataFrame(columns=(df_columns+self.pitching_columns))
+        df = pd.DataFrame(columns=df_columns)
+        for player in roster_json:
+            player_dict = {"team_id": self.team_id, "player_id": player["playerId"],
+                           "lineup_id": player["lineupSlotId"], "position": POSITION_MAP[player["lineupSlotId"]]}
+            for stat_set in player["playerPoolEntry"]["player"]["stats"]:
+                if stat_set["statSourceId"] == 0 and stat_set["statSplitTypeId"] == 5:
+                    player_dict["scoring_period_id"] = stat_set["scoringPeriodId"]
+                    # checks if the player is in an active hitting spot and adds hitting stats to the player dict
+                    if int(player_dict["lineup_id"]) <= 12 or int(player_dict["lineup_id"]) == 19:
+                        player_dict.update(self.process_hitting_stats(stat_set["stats"]))
+                        hitting_df = hitting_df.append(player_dict, ignore_index=True)
+                    # checks if the player is in an active pitching spot and adds pitching stats to the player dict
+                    elif 13 <= int(player_dict["lineup_id"]) <= 15:
+                        player_dict.update(self.process_pitching_stats(stat_set["stats"]))
+                        pitching_df = pitching_df.append(player_dict, ignore_index=True)
+        return hitting_df, pitching_df
 
     @staticmethod
     def process_hitting_stats(stat_dict):

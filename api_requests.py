@@ -16,6 +16,7 @@ class ESPNRequester:
         """
         params = {"view": "mTeam"}
         r = requests.get(self.url, params=params, cookies=self.cookies)
+        print(r.url)
         return r.json()["teams"]
 
     def get_daily_stats(self, scoring_period_id: int):
@@ -26,13 +27,15 @@ class ESPNRequester:
         """
         params = {"scoringPeriodId": f"{scoring_period_id}", "view": "mRoster"}
         r = requests.get(self.url, params=params, cookies=self.cookies)
+        print(r.url)
         return r.json()["teams"]
 
     def get_league_settings(self):
         """
-
-        :return:
+        Grabs league settings and status
+        :return: dictionary
         """
         params = {"view": "mSettings"}
         r = requests.get(self.url, params=params, cookies=self.cookies)
-        return r.json()["settings"]
+        print(r.url)
+        return r.json()
