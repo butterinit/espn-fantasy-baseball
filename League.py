@@ -39,7 +39,7 @@ class League:
 
     def update_daily_statistics(self, scoring_period_id: int):
         """
-        Gets statistics for the players on each roster in the league for the specified scoring period.
+        Gets statistics for players in active roster spots for every team roster in the specified scoring period.
         :param scoring_period_id: The scoring period for which statistics will be gathered.
         :return: A DataFrame containing the league statistics for the scoring period.
         """
@@ -49,14 +49,14 @@ class League:
         for team in self.teams:
             team_roster_json = league_roster_json[team.team_id-1]["roster"]["entries"]
             hitting, pitching = team.get_daily_stats(team_roster_json)
-            hitting_df = hitting_df.append(hitting)
-            pitching_df = pitching_df.append(pitching)
+            hitting_df = hitting_df.append(hitting, ignore_index=True)
+            pitching_df = pitching_df.append(pitching, ignore_index=True)
         return hitting_df, pitching_df
 
-    def get_all_daily_stats(self, hitting_file: str = "total daily hitting.xlsx", pitching_file:
-                            str = "total daily pitching.xlsx"):
+    def get_all_daily_stats(self, hitting_file: str = "All Daily Hitting 2021.xlsx", pitching_file:
+                            str = "All Daily Pitching 2021.xlsx"):
         """
-        gets daily stats for the entire season and outputs the data as two seperate excel files.
+        gets daily stats for the entire season and outputs the data as two separate excel files.
         todo: combine the files into one workbook
         :param hitting_file:
         :param pitching_file:
@@ -66,8 +66,8 @@ class League:
         pitching_df = pd.DataFrame()
         for i in range(1, self.final_scoring_period+1):
             hitting, pitching = self.update_daily_statistics(i)
-            hitting_df = hitting_df.append(hitting)
-            pitching_df = pitching_df.append(pitching)
+            hitting_df = hitting_df.append(hitting, ignore_index=True)
+            pitching_df = pitching_df.append(pitching, ignore_index=True)
         hitting_df.to_excel(hitting_file)
         pitching_df.to_excel(pitching_file)
 

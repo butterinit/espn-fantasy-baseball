@@ -1,5 +1,5 @@
 import pandas as pd
-from espn_constant import HITTING_MAP, PITCHING_MAP, POSITION_MAP
+from espn_constant import HITTING_MAP, PITCHING_MAP, POSITION_MAP, MATCHUP_PERIOD_MAP_2021
 
 
 class Team:
@@ -27,7 +27,7 @@ class Team:
             self.update_season_stats(self.team_json)
 
     def __repr__(self):
-        return f"team: {self.team_id}"
+        return f"{self.location} {self.nickname}"
 
     def create_frames(self):
         """
@@ -42,7 +42,7 @@ class Team:
 
     def update_team_info(self, team_json: dict):
         """
-        Updates the information for each team in the league.
+        Updates the Team
         :param team_json: JSON data for the team
         :return: None
         """
@@ -107,16 +107,18 @@ class Team:
         :param roster_json: The team roster JSON returned from the ESPN API for the specified scoring period.
         :return: Pandas DataFrame
         """
-        df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id", "position"]
+        df_columns = ["team_id", "player_id", "scoring_period_id", "matchup_period_id", "lineup_id", "position"]
         hitting_df = pd.DataFrame(columns=(df_columns+self.hitting_columns))
         pitching_df = pd.DataFrame(columns=(df_columns+self.pitching_columns))
-        df = pd.DataFrame(columns=df_columns)
         for player in roster_json:
             player_dict = {"team_id": self.team_id, "player_id": player["playerId"],
                            "lineup_id": player["lineupSlotId"], "position": POSITION_MAP[player["lineupSlotId"]]}
             for stat_set in player["playerPoolEntry"]["player"]["stats"]:
                 if stat_set["statSourceId"] == 0 and stat_set["statSplitTypeId"] == 5:
                     player_dict["scoring_period_id"] = stat_set["scoringPeriodId"]
+                    for key in MATCHUP_PERIOD_MAP_2021:
+                        if player_dict["scoring_period_id"] in MATCHUP_PERIOD_MAP_2021[key]:
+                            player_dict["matchup_period_id"] = key
                     # checks if the player is in an active hitting spot and adds hitting stats to the player dict
                     if int(player_dict["lineup_id"]) <= 12 or int(player_dict["lineup_id"]) == 19:
                         player_dict.update(self.process_hitting_stats(stat_set["stats"]))

@@ -17,7 +17,7 @@ POSITION_MAP = {
     15: 'RP',
     16: 'BE',
     17: 'IL',
-    19: 'IF', # 1B/2B/SS/3B
+    19: 'IF',  # 1B/2B/SS/3B
     # reverse TODO
     # 18, 21, 22 have appeared but unknown what position they correspond to
 }
@@ -56,7 +56,6 @@ PRO_TEAM_MAP = {
     30: 'TB',
 }
 
-
 HITTING_MAP = {
     0: 'AB',
     1: 'H',
@@ -64,47 +63,47 @@ HITTING_MAP = {
     3: '2B',
     4: '3B',
     5: 'HR',
-    6: 'XBH', # 2B + 3B + HR
+    6: 'XBH',  # 2B + 3B + HR
     7: '1B',
-    8: 'TB', # 1 * COUNT(1B) + 2 * COUNT(2B) + 3 * COUNT(3B) + 4 * COUNT(HR)
+    8: 'TB',  # 1 * COUNT(1B) + 2 * COUNT(2B) + 3 * COUNT(3B) + 4 * COUNT(HR)
     9: 'SLG',
     10: 'BB',
     11: 'IBB',
     12: 'HBP',
-    13: 'SF', # Sacrifice Fly
-    14: 'SH', # Sacrifice Hit - i.e. Sacrifice Bunt
-    15: 'SAC', # total sacrifices = SF + SH
+    13: 'SF',  # Sacrifice Fly
+    14: 'SH',  # Sacrifice Hit - i.e. Sacrifice Bunt
+    15: 'SAC',  # total sacrifices = SF + SH
     16: 'PA',
     17: 'OBP',
-    18: 'OPS', # OBP + SLG
-    19: 'RC', # Runs Created = TB * (H + BB) / (AB + BB)
+    18: 'OPS',  # OBP + SLG
+    19: 'RC',  # Runs Created = TB * (H + BB) / (AB + BB)
     20: 'R',
     21: 'RBI',
     22: 'Unknown1',
     23: 'SB',
     24: 'CS',
-    25: 'SB-CS', # net steals
+    25: 'SB-CS',  # net steals
     26: 'GDP',
-    27: 'SO', # batter strike-outs
-    28: 'PS', # pitches seen
-    29: 'PPA', # pitches per plate appearance = PS / PA
+    27: 'SO',  # batter strike-outs
+    28: 'PS',  # pitches seen
+    29: 'PPA',  # pitches per plate appearance = PS / PA
     30: 'Unknown2',
     31: 'CYC'
 }
 
 PITCHING_MAP = {
-    32: 'GP', # pitcher games pitched
-    33: 'GS', # games started
+    32: 'GP',  # pitcher games pitched
+    33: 'GS',  # games started
     34: 'OUTS',  # divide by 3 for IP
     35: 'TBF',
     36: 'P',  # pitches
     37: 'H',
-    38: 'OBA', # Opponent Batting Average
+    38: 'OBA',  # Opponent Batting Average
     39: 'BB',
-    40: 'IBB', # intentional walks allowed
+    40: 'IBB',  # intentional walks allowed
     41: 'WHIP',
     42: 'HBP',
-    43: 'OOBP', # Opponent On-Base Percentage
+    43: 'OOBP',  # Opponent On-Base Percentage
     44: 'R',
     45: 'ER',
     46: 'HR',
@@ -113,31 +112,31 @@ PITCHING_MAP = {
     49: 'K/9',
     50: 'WP',
     51: 'BK',
-    52: 'PK', # pickoff
+    52: 'PK',  # pickoff
     53: 'W',
     54: 'L',
-    55: 'WPCT', # Win Percentage
-    56: 'SVO', # Save opportunity
+    55: 'WPCT',  # Win Percentage
+    56: 'SVO',  # Save opportunity
     57: 'SV',
-    58: 'BS', # BLown SaVe
-    59: 'SV%', # Save percentage
+    58: 'BS',  # BLown SaVe
+    59: 'SV%',  # Save percentage
     60: 'HLD',
     61: 'Unknown1',
     62: 'CG',
     63: 'QS',
     64: 'Unknown2',
-    65: 'NH', # No-hitters
-    66: 'PG', # Perfect Games
+    65: 'NH',  # No-hitters
+    66: 'PG',  # Perfect Games
 }
 
 FIELDING_MAP = {
-    67: 'TC', # Total Chances = PO + A + E
-    68: 'PO', # Put Outs
-    69: 'A', # Assists
-    70: 'OFA', # Outfield Assists
-    71: 'FPCT', # Fielding Percentage
+    67: 'TC',  # Total Chances = PO + A + E
+    68: 'PO',  # Put Outs
+    69: 'A',  # Assists
+    70: 'OFA',  # Outfield Assists
+    71: 'FPCT',  # Fielding Percentage
     72: 'E',
-    73: 'DP', # Double plays turned
+    73: 'DP',  # Double plays turned
 }
 
 ACTIVITY_MAP = {
@@ -150,4 +149,32 @@ ACTIVITY_MAP = {
     'FA': 178,
     'WAIVER': 180,
     'TRADED': 244
+}
+
+MATCHUP_PERIOD_MAP_2021 = {
+    1: (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+    2: (12, 13, 14, 15, 16, 17, 18),
+    3: (19, 20, 21, 22, 23, 24, 25),
+    4: (26, 27, 28, 29, 30, 31, 32),
+    5: (33, 34, 35, 36, 37, 38, 39),
+    6: (40, 41, 42, 43, 44, 45, 46),
+    7: (47, 48, 49, 50, 51, 52, 53),
+    8: (54, 55, 56, 57, 58, 59, 60),
+    9: (61, 62, 63, 64, 65, 66, 67),
+    10: (68, 69, 70, 71, 72, 73, 74),
+    11: (75, 76, 77, 78, 79, 80, 81),
+    12: (82, 83, 84, 85, 86, 87, 88),
+    13: (89, 90, 91, 92, 93, 94, 95),
+    14: (96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109),
+    15: (110, 111, 112, 113, 114, 115, 116),
+    16: (117, 118, 119, 120, 121, 122, 123),
+    17: (124, 125, 126, 127, 128, 129, 130),
+    18: (131, 132, 133, 134, 135, 136, 137),
+    19: (138, 139, 140, 141, 142, 143, 144),
+    20: (145, 146, 147, 148, 149, 150, 151),
+    21: (152, 153, 154, 155, 156, 157, 158),
+    22: (159, 160, 161, 162, 163, 164, 165),
+    23: (166, 167, 168, 169, 170, 171, 172),
+    24: (173, 174, 175, 176, 177, 178, 179),
+    25: (180, 181, 182, 183, 184, 185, 186)
 }
