@@ -5,9 +5,10 @@ if __name__ == '__main__':
     league_id = 123456789
     year = 2021
 
-    # swid and espn_s2 are only needed for private leagues
+    # swid and espn_s2 are cookies are only needed for private leagues
+    # Cookies can be found using the developor tools of your web browser
     swid = "{XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}"
-    espn_s2 = "long string................................................................................" \
+    espn_s2 = "your espn_s2 cookie should be a string about this long....................................." \
               "%2goes....................................................................................." \
               "%2here..................................................................................... "
 
@@ -22,13 +23,13 @@ if __name__ == '__main__':
     # By default these will be stored in excel workbooks in the same folder as this file
     my_league.get_all_daily_stats()
 
-    # Prints a list of each team in the league
+    # Prints a list of the teams in the league
     print(my_league.teams)
 
-    # Stores the first team in the list of teams in a variable to simplify the syntax for the next step
+    # Assigns the first team object to a variable 
     first_team = my_league.teams[0]
 
-    # You can access information about each team by calling attributes
+    # Different pieces of data for each team can be accesed by calling attributes of the team object
     # Examples of some of the information that is retrievable can be seen below
     print(first_team.logo)
     print(first_team.abbreviation)
