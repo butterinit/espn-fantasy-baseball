@@ -5,10 +5,9 @@ if __name__ == '__main__':
     league_id = 123456789
     year = 2021
 
-    # swid and espn_s2 are cookies are only needed for private leagues
-    # Cookies can be found using the developor tools of your web browser
+    # swid and espn_s2 are only needed for private leagues
     swid = "{XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}"
-    espn_s2 = "your espn_s2 cookie should be a string about this long....................................." \
+    espn_s2 = "long string................................................................................" \
               "%2goes....................................................................................." \
               "%2here..................................................................................... "
 
@@ -20,16 +19,17 @@ if __name__ == '__main__':
     my_league.season_pitching.to_excel("season_pitching.xlsx")
 
     # The get_all_daily_stats method gets the stat line for each player in a team's active roster spot for the season
-    # By default these will be stored in excel workbooks in the same folder as this file
-    my_league.get_all_daily_stats()
+    # Returns a tuple of pitching and hitting DataFrames respectively
+    all_hitting, all_pitching = my_league.get_all_daily_stats()
+    all_hitting.to_excel("all_hitting.xlsx")
 
-    # Prints a list of the teams in the league
+    # Prints a list of each team in the league
     print(my_league.teams)
 
-    # Assigns the first team object to a variable 
+    # Stores the first team in the list of teams in a variable to simplify the syntax for the next step
     first_team = my_league.teams[0]
 
-    # Different pieces of data for each team can be accesed by calling attributes of the team object
+    # You can access information about each team by calling attributes
     # Examples of some of the information that is retrievable can be seen below
     print(first_team.logo)
     print(first_team.abbreviation)

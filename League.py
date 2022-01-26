@@ -53,14 +53,10 @@ class League:
             pitching_df = pitching_df.append(pitching, ignore_index=True)
         return hitting_df, pitching_df
 
-    def get_all_daily_stats(self, hitting_file: str = "All Daily Hitting 2021.xlsx", pitching_file:
-                            str = "All Daily Pitching 2021.xlsx"):
+    def get_all_daily_stats(self):
         """
-        gets daily stats for the entire season and outputs the data as two separate excel files.
-        todo: combine the files into one workbook
-        :param hitting_file:
-        :param pitching_file:
-        :return: None
+        gets daily stats for the entire season and outputs the data as two separate dataframes in a tuple
+        :return: A tuple of dataframes
         """
         hitting_df = pd.DataFrame()
         pitching_df = pd.DataFrame()
@@ -68,8 +64,7 @@ class League:
             hitting, pitching = self.update_daily_statistics(i)
             hitting_df = hitting_df.append(hitting, ignore_index=True)
             pitching_df = pitching_df.append(pitching, ignore_index=True)
-        hitting_df.to_excel(hitting_file)
-        pitching_df.to_excel(pitching_file)
+        return hitting_df, pitching_df
 
     def get_league_info(self):
         """
