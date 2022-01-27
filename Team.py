@@ -19,9 +19,9 @@ class Team:
         self.transaction_counter = None
         self.division_id = None
         self.team_json = team_json
-        self.hitting_columns = list()
-        self.pitching_columns = list()
-        self.create_frames()
+        self.hitting_frame = pd.DataFrame()
+        self.pitching_frame = pd.DataFrame()
+        self.create_frame_templates()
         if self.team_json is not None:
             self.update_team_info(self.team_json)
             self.update_season_stats(self.team_json)
@@ -29,16 +29,22 @@ class Team:
     def __repr__(self):
         return f"{self.location} {self.nickname}"
 
-    def create_frames(self):
+    def create_frame_templates(self):
         """
         Creates a list of the pitching and hitting columns to be used in the statistical DataFrames.
         The column lists are stored in the Team attributes.
         :return: None
         """
+        shared_columns = ["Team ID", "Player Name", "ESPN Player ID", "Scoring Period", "Matchup Period",
+                          "Lineup ID", "Position"]
+        hitting_columns = shared_columns.copy()
+        pitching_columns = shared_columns.copy()
         for stat in HITTING_MAP:
-            self.hitting_columns.append(HITTING_MAP[stat])
+            hitting_columns.append(HITTING_MAP[stat])
         for stat in PITCHING_MAP:
-            self.pitching_columns.append(PITCHING_MAP[stat])
+            pitching_columns.append(PITCHING_MAP[stat])
+        self.hitting_frame = pd.DataFrame(columns=hitting_columns)
+        self.pitching_frame = pd.DataFrame(columns=pitching_columns)
 
     def update_team_info(self, team_json: dict):
         """
@@ -76,30 +82,6 @@ class Team:
         self.season_pitching = pd.DataFrame(pitching_dict, index={self.team_id})
         self.season_pitching.index.name = 'team_id'
 
-    def get_daily_stats_old(self, roster_json: dict):
-        """
-        Parses the JSON info returned from the ESPN API and stores the statistics of the team in a DataFrame.
-        Need to sort stats for ease of viewing.
-        :param roster_json: The team roster JSON returned from the ESPN API for the specified scoring period.
-        :return: Pandas DataFrame
-        """
-        df_columns = ["team_id", "player_id", "scoring_period_id", "lineup_id", "position"]
-        df = pd.DataFrame(columns=df_columns)
-        for player in roster_json:
-            player_dict = {"team_id": self.team_id, "player_id": player["playerId"],
-                           "lineup_id": player["lineupSlotId"], "position": POSITION_MAP[player["lineupSlotId"]]}
-            for stat_set in player["playerPoolEntry"]["player"]["stats"]:
-                if stat_set["statSourceId"] == 0 and stat_set["statSplitTypeId"] == 5:
-                    player_dict["scoring_period_id"] = stat_set["scoringPeriodId"]
-                    # checks if the player is in an active hitting spot and adds hitting stats to the player dict
-                    if int(player_dict["lineup_id"]) <= 12 or int(player_dict["lineup_id"]) == 19:
-                        player_dict.update(self.process_hitting_stats(stat_set["stats"]))
-                    # checks if the player is in an active pitching spot and adds pitching stats to the player dict
-                    elif 13 <= int(player_dict["lineup_id"]) <= 15:
-                        player_dict.update(self.process_pitching_stats(stat_set["stats"]))
-            df = df.append(player_dict, ignore_index=True)
-        return df
-
     def get_daily_stats(self, roster_json: dict):
         """
         Parses the JSON info returned from the ESPN API and stores the statistics of the team in a DataFrame.
@@ -107,24 +89,24 @@ class Team:
         :param roster_json: The team roster JSON returned from the ESPN API for the specified scoring period.
         :return: Pandas DataFrame
         """
-        df_columns = ["team_id", "player_id", "scoring_period_id", "matchup_period_id", "lineup_id", "position"]
-        hitting_df = pd.DataFrame(columns=(df_columns+self.hitting_columns))
-        pitching_df = pd.DataFrame(columns=(df_columns+self.pitching_columns))
+        hitting_df = self.hitting_frame.copy(deep=True)
+        pitching_df = self.pitching_frame.copy(deep=True)
         for player in roster_json:
-            player_dict = {"team_id": self.team_id, "player_id": player["playerId"],
-                           "lineup_id": player["lineupSlotId"], "position": POSITION_MAP[player["lineupSlotId"]]}
+            player_dict = {"Team ID": self.team_id, "Player Name": player["playerPoolEntry"]["player"]["fullName"],
+                           "ESPN Player ID": player["playerId"], "Lineup ID": player["lineupSlotId"],
+                           "Position": POSITION_MAP[player["lineupSlotId"]]}
             for stat_set in player["playerPoolEntry"]["player"]["stats"]:
                 if stat_set["statSourceId"] == 0 and stat_set["statSplitTypeId"] == 5:
-                    player_dict["scoring_period_id"] = stat_set["scoringPeriodId"]
+                    player_dict["Scoring Period"] = stat_set["scoringPeriodId"]
                     for key in MATCHUP_PERIOD_MAP_2021:
-                        if player_dict["scoring_period_id"] in MATCHUP_PERIOD_MAP_2021[key]:
-                            player_dict["matchup_period_id"] = key
+                        if player_dict["Scoring Period"] in MATCHUP_PERIOD_MAP_2021[key]:
+                            player_dict["Matchup Period"] = key
                     # checks if the player is in an active hitting spot and adds hitting stats to the player dict
-                    if int(player_dict["lineup_id"]) <= 12 or int(player_dict["lineup_id"]) == 19:
+                    if int(player_dict["Lineup ID"]) <= 12 or int(player_dict["Lineup ID"]) == 19:
                         player_dict.update(self.process_hitting_stats(stat_set["stats"]))
                         hitting_df = hitting_df.append(player_dict, ignore_index=True)
                     # checks if the player is in an active pitching spot and adds pitching stats to the player dict
-                    elif 13 <= int(player_dict["lineup_id"]) <= 15:
+                    elif 13 <= int(player_dict["Lineup ID"]) <= 15:
                         player_dict.update(self.process_pitching_stats(stat_set["stats"]))
                         pitching_df = pitching_df.append(player_dict, ignore_index=True)
         return hitting_df, pitching_df
