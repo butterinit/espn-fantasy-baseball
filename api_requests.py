@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import requests
 
 
@@ -51,3 +52,46 @@ class ESPNRequester:
             return r.json()[0]
         else:
             return r.json()
+=======
+import requests
+
+
+class ESPNRequester:
+    def __init__(self, league_id: int, season_id: int, swid: str = None, espn_s2: str = None):
+        self.league_id = league_id
+        self.season_id = season_id
+        # The base url for api requests of the specified fantasy league.  Only valid for season_id > 2018
+        self.url = f"https://fantasy.espn.com/apis/v3/games/flb/seasons/{season_id}/segments/0/leagues/{league_id}"
+        self.cookies = dict(swid=swid, espn_s2=espn_s2)
+
+    def get_teams(self):
+        """
+        Returns JSON data for each team in the league
+        :return: dict
+        """
+        params = {"view": "mTeam"}
+        r = requests.get(self.url, params=params, cookies=self.cookies)
+        print(r.url)
+        return r.json()["teams"]
+
+    def get_daily_stats(self, scoring_period_id: int):
+        """
+        Grabs the roster and scoring information for the specified scoring period for all teams in the league
+        :param scoring_period_id: The scoring period from which to grab stats from.
+        :return: list
+        """
+        params = {"scoringPeriodId": f"{scoring_period_id}", "view": "mRoster"}
+        r = requests.get(self.url, params=params, cookies=self.cookies)
+        print(r.url)
+        return r.json()["teams"]
+
+    def get_league_settings(self):
+        """
+        Grabs league settings and status
+        :return: dictionary
+        """
+        params = {"view": "mSettings"}
+        r = requests.get(self.url, params=params, cookies=self.cookies)
+        print(r.url)
+        return r.json()
+>>>>>>> acb2ee0d95f3e9484687e39e7082d13e1871271c
