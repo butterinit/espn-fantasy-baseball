@@ -3,10 +3,8 @@ from espn_constant import HITTING_MAP, PITCHING_MAP, POSITION_MAP, MATCHUP_PERIO
 
 
 class Team:
-    def __init__(self, league_id: int, season_id: int, team_id: int, team_json: dict = None):
-        self.league_id = league_id
-        self.season_id = season_id
-        self.team_id = team_id
+    def __init__(self, team_json: dict = None):
+        self.team_id = None
         self.current_roster = None
         self.season_hitting = None
         self.season_pitching = None
@@ -53,10 +51,11 @@ class Team:
         :return: None
         """
         data = team_json
+        self.team_id = data["id"]
         self.abbrev = data["abbrev"]
         self.division_id = data["divisionId"]
         self.location = data["location"]
-        self.logo = data["logo"]
+        self.logo = data.get("logo")
         self.nickname = data["nickname"]
         self.swid = data["primaryOwner"]
         self.record = data["record"]["overall"]
@@ -79,8 +78,10 @@ class Team:
                 pitching_dict[PITCHING_MAP[stat]] = data[str(stat)]
         self.season_hitting = pd.DataFrame(hitting_dict, index={self.team_id})
         self.season_hitting.index.name = 'team_id'
+        self.season_hitting.insert(0, "Team", self.location + self.nickname)
         self.season_pitching = pd.DataFrame(pitching_dict, index={self.team_id})
         self.season_pitching.index.name = 'team_id'
+        self.season_pitching.insert(0, "Team", self.location + self.nickname)
 
     def get_daily_stats(self, roster_json: dict):
         """
@@ -109,6 +110,8 @@ class Team:
                     elif 13 <= int(player_dict["Lineup ID"]) <= 15:
                         player_dict.update(self.process_pitching_stats(stat_set["stats"]))
                         pitching_df = pitching_df.append(player_dict, ignore_index=True)
+        hitting_df.fillna(0, inplace=True)
+        pitching_df.fillna(0, inplace=True)
         return hitting_df, pitching_df
 
     @staticmethod
