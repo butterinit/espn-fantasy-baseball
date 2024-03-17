@@ -23,9 +23,9 @@ class League:
         """
         data = self.req.get_teams()
         team_quantity = len(data)
-        for team_id in range(1, team_quantity+1):
-            team_data = data[team_id-1]
-            new_team = Team(self.league_id, self.season_id, team_id, team_json=team_data)
+        for i in range(1, team_quantity+1):
+            team_data = data[i-1]
+            new_team = Team(team_json=team_data)
             self.teams.append(new_team)
 
     def update_season_statistics(self):
@@ -47,7 +47,7 @@ class League:
         hitting_df = pd.DataFrame()
         pitching_df = pd.DataFrame()
         for team in self.teams:
-            team_roster_json = league_roster_json[team.team_id-1]["roster"]["entries"]
+            team_roster_json = league_roster_json[self.teams.index(team)]["roster"]["entries"]
             hitting, pitching = team.get_daily_stats(team_roster_json)
             hitting_df = hitting_df.append(hitting, ignore_index=True)
             pitching_df = pitching_df.append(pitching, ignore_index=True)
